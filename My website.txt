@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEKONGE.SYS — Engineering the Future of Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Syne:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --neon-blue: #00d4ff;
+    --neon-violet: #9b4dff;
+    --neon-silver: #c8d6e5;
+    --dark-base: #020510;
+    --dark-mid: #060d1f;
+    --dark-panel: rgba(6, 18, 42, 0.7);
+    --glass: rgba(0, 212, 255, 0.05);
+    --glass-border: rgba(0, 212, 255, 0.15);
+    --text-primary: #e8f4ff;
+    --text-muted: rgba(200, 214, 229, 0.6);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--dark-base);
+    color: var(--text-primary);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 12px; height: 12px;
+    background: var(--neon-blue);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.05s, width 0.2s, height 0.2s, background 0.2s;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 40px; height: 40px;
+    border: 1px solid rgba(0, 212, 255, 0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.12s ease-out, width 0.3s, height 0.3s, border-color 0.3s;
+  }
+  body:hover .cursor-ring { border-color: rgba(155, 77, 255, 0.5); }
+
+  /* Neural canvas background */
+  #neural-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    opacity: 0.35;
+  }
+
+  /* Floating grid overlay */
+  .grid-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1;
+    background-image:
+      linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  /* Scan line effect */
+  .scanlines {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 2;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 24px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(20px);
+    background: rgba(2, 5, 16, 0.6);
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .nav-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    color: var(--neon-blue);
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+  }
+  .nav-logo span { color: var(--neon-violet); }
+
+  .nav-links {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s, text-shadow 0.3s;
+  }
+  .nav-links a:hover {
+    color: var(--neon-blue);
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  }
+
+  .nav-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    background: #00ff88;
+    border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; box-shadow: 0 0 6px #00ff88; }
+    50% { opacity: 0.4; box-shadow: none; }
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 140px 60px 80px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .hero-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--neon-violet);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: fadeSlideUp 1s ease both;
+  }
+  .hero-tag::before {
+    content: '';
+    width: 30px; height: 1px;
+    background: var(--neon-violet);
+    box-shadow: 0 0 8px var(--neon-violet);
+  }
+
+  .hero-headline {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 800px;
+    margin-bottom: 28px;
+    animation: fadeSlideUp 1s ease 0.15s both;
+  }
+
+  .hero-headline .line-gradient {
+    background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-violet) 60%, #ff6bc1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subheadline {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text-muted);
+    max-width: 520px;
+    margin-bottom: 48px;
+    font-weight: 300;
+    animation: fadeSlideUp 1s ease 0.3s both;
+  }
+
+  .hero-cta-group {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    animation: fadeSlideUp 1s ease 0.45s both;
+  }
+
+  .btn-primary {
+    position: relative;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dark-base);
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-violet));
+    border: none;
+    padding: 18px 44px;
+    cursor: none;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    transition: transform 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 60px rgba(0, 212, 255, 0.4), 0 0 100px rgba(155, 77, 255, 0.2);
+  }
+  .btn-primary:hover::before { opacity: 1; }
+
+  .btn-secondary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--neon-blue);
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    padding: 18px 40px;
+    cursor: none;
+    transition: border-color 0.3s, color 0.3s, background 0.3s;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-secondary:hover {
+    border-color: var(--neon-blue);
+    background: rgba(0, 212, 255, 0.05);
+  }
+
+  /* Holographic stats strip */
+  .stats-strip {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    animation: fadeSlideUp 1s ease 0.6s both;
+  }
+
+  .stat-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    padding: 24px 28px;
+    min-width: 160px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px; height: 100%;
+    background: linear-gradient(to bottom, var(--neon-blue), var(--neon-violet));
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at center, rgba(0, 212, 255, 0.04), transparent 70%);
+    animation: rotate-glow 8s linear infinite;
+  }
+  @keyframes rotate-glow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--neon-blue);
+    text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  /* Scroll indicator */
+  .scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 60px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    animation: fadeSlideUp 1s ease 0.8s both;
+  }
+  .scroll-line {
+    width: 40px; height: 1px;
+    background: linear-gradient(to right, var(--neon-blue), transparent);
+    animation: scroll-extend 2s ease-in-out infinite;
+  }
+  @keyframes scroll-extend {
+    0%, 100% { width: 40px; }
+    50% { width: 60px; }
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ABOUT SECTION */
+  section {
+    position: relative;
+    z-index: 10;
+    padding: 120px 60px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--neon-violet);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--neon-violet), transparent);
+    max-width: 100px;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.8rem, 3vw, 3rem);
+    font-weight: 700;
+    margin-bottom: 60px;
+    line-height: 1.2;
+  }
+
+  /* Skills Grid */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-bottom: 80px;
+  }
+
+  .skill-tile {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+    padding: 32px 28px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.4s, border-color 0.4s, transform 0.4s;
+    cursor: none;
+  }
+  .skill-tile:hover {
+    background: rgba(0, 212, 255, 0.08);
+    border-color: rgba(0, 212, 255, 0.4);
+    transform: translateY(-4px);
+  }
+  .skill-tile:hover .skill-glow { opacity: 1; }
+
+  .skill-glow {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(0, 212, 255, 0.08), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+  }
+
+  .skill-icon {
+    font-size: 0.65rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--neon-blue);
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+    opacity: 0.7;
+  }
+
+  .skill-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+  }
+
+  .skill-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .skill-bar {
+    margin-top: 16px;
+    height: 2px;
+    background: rgba(255,255,255,0.05);
+    position: relative;
+    overflow: hidden;
+  }
+  .skill-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--neon-blue), var(--neon-violet));
+    box-shadow: 0 0 8px var(--neon-blue);
+    transition: width 1.5s ease;
+    animation: bar-glow 2s ease-in-out infinite alternate;
+  }
+  @keyframes bar-glow {
+    from { box-shadow: 0 0 4px var(--neon-blue); }
+    to { box-shadow: 0 0 12px var(--neon-blue), 0 0 20px rgba(155, 77, 255, 0.3); }
+  }
+
+  /* Experience timeline */
+  .exp-block {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2px;
+  }
+  .exp-block::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--neon-blue), var(--neon-violet));
+    box-shadow: 0 0 15px var(--neon-blue);
+  }
+
+  .exp-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--neon-violet);
+    margin-bottom: 8px;
+  }
+  .exp-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .exp-org {
+    font-size: 0.85rem;
+    color: var(--neon-blue);
+    letter-spacing: 0.05em;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .exp-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .exp-detail-item {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.6;
+  }
+  .exp-detail-item::before {
+    content: '▸';
+    color: var(--neon-blue);
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    margin-top: 2px;
+  }
+
+  /* Education */
+  .edu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  .edu-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 36px 30px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .edu-card:hover {
+    border-color: rgba(155, 77, 255, 0.4);
+    background: rgba(155, 77, 255, 0.05);
+  }
+  .edu-year {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    color: var(--neon-violet);
+    letter-spacing: 0.15em;
+    margin-bottom: 12px;
+  }
+  .edu-degree {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .edu-inst {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .edu-badge {
+    display: inline-block;
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--neon-blue);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    padding: 4px 12px;
+    text-transform: uppercase;
+  }
+
+  /* Contact / CTA section */
+  .cta-section {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.04), rgba(155, 77, 255, 0.04));
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 100px 60px;
+    text-align: center;
+    position: relative;
+    z-index: 10;
+    overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.06), transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 900;
+    margin-bottom: 20px;
+  }
+  .cta-sub {
+    font-size: 1rem;
+    color: var(--text-muted);
+    max-width: 500px;
+    margin: 0 auto 48px;
+    line-height: 1.8;
+  }
+
+  .contact-grid {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 60px;
+  }
+
+  .contact-item {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 20px 32px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    transition: border-color 0.3s, color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .contact-item:hover {
+    border-color: var(--neon-blue);
+    color: var(--neon-blue);
+  }
+  .contact-item .ci-dot {
+    width: 6px; height: 6px;
+    background: var(--neon-blue);
+    border-radius: 50%;
+  }
+
+  /* Footer */
+  footer {
+    position: relative;
+    z-index: 10;
+    padding: 40px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .footer-copy {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(200, 214, 229, 0.3);
+    letter-spacing: 0.1em;
+  }
+  .footer-sys {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(0, 212, 255, 0.3);
+    letter-spacing: 0.1em;
+    animation: flicker 4s ease-in-out infinite;
+  }
+  @keyframes flicker {
+    0%, 95%, 100% { opacity: 1; }
+    96% { opacity: 0.3; }
+    97% { opacity: 1; }
+    98% { opacity: 0.5; }
+  }
+
+  /* Holographic corner decorations */
+  .corner-decoration {
+    position: absolute;
+    width: 40px; height: 40px;
+    pointer-events: none;
+  }
+  .corner-tl { top: 0; left: 0; border-top: 2px solid var(--neon-blue); border-left: 2px solid var(--neon-blue); }
+  .corner-tr { top: 0; right: 0; border-top: 2px solid var(--neon-blue); border-right: 2px solid var(--neon-blue); }
+  .corner-bl { bottom: 0; left: 0; border-bottom: 2px solid var(--neon-violet); border-left: 2px solid var(--neon-violet); }
+  .corner-br { bottom: 0; right: 0; border-bottom: 2px solid var(--neon-violet); border-right: 2px solid var(--neon-violet); }
+
+  /* Floating holographic orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+    animation: orb-float 20s ease-in-out infinite;
+  }
+  .orb-1 { width: 400px; height: 400px; background: rgba(0, 212, 255, 0.07); top: -100px; right: 200px; animation-duration: 25s; }
+  .orb-2 { width: 300px; height: 300px; background: rgba(155, 77, 255, 0.07); bottom: 200px; left: -50px; animation-duration: 18s; animation-delay: -8s; }
+  .orb-3 { width: 200px; height: 200px; background: rgba(255, 107, 193, 0.05); top: 40%; right: 100px; animation-duration: 22s; animation-delay: -4s; }
+
+  @keyframes orb-float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    33% { transform: translateY(-40px) scale(1.05); }
+    66% { transform: translateY(20px) scale(0.95); }
+  }
+
+  /* section divider */
+  .divider {
+    width: 100%; height: 1px;
+    background: linear-gradient(to right, transparent, var(--glass-border), transparent);
+    position: relative;
+    z-index: 10;
+  }
+
+  /* responsive */
+  @media (max-width: 1100px) {
+    nav { padding: 20px 30px; }
+    .hero { padding: 120px 30px 80px; }
+    section { padding: 80px 30px; }
+    .stats-strip { display: none; }
+    .skills-grid { grid-template-columns: repeat(2, 1fr); }
+    .edu-grid { grid-template-columns: repeat(2, 1fr); }
+    .exp-details { grid-template-columns: 1fr; }
+    #experience .skills-grid, #experience [style*="grid-template-columns: repeat(4"] { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+  @media (max-width: 700px) {
+    .nav-links { display: none; }
+    .skills-grid, .edu-grid { grid-template-columns: 1fr; }
+    .hero-headline { font-size: 2.2rem; }
+    .cta-section { padding: 60px 30px; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- Background layers -->
+<canvas id="neural-canvas"></canvas>
+<div class="grid-overlay"></div>
+<div class="scanlines"></div>
+
+<!-- Orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">MEKONGE<span>.SYS</span></div>
+  <ul class="nav-links">
+    <li><a href="#capabilities">Capabilities</a></li>
+    <li><a href="#experience">Intelligence</a></li>
+    <li><a href="#education">Education</a></li>
+    <li><a href="#contact">Connect</a></li>
+  </ul>
+  <div class="nav-status">
+    <div class="status-dot"></div>
+    <span>SYSTEM ONLINE · 2050</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div style="position:relative; z-index:10; max-width:1400px; margin:0 auto;">
+  <div class="hero">
+    <div class="hero-tag">FELIX MEKONGE · CYBERSECURITY ENGINEER · EST. 2025</div>
+    <h1 class="hero-headline">
+      Engineering the<br>
+      <span class="line-gradient">Future of Intelligence</span>
+    </h1>
+    <p class="hero-subheadline">
+      Architecting tomorrow's digital defenses today. Merging IAM, threat intelligence, and network security into one cohesive vision — built for a world where trust is the only true currency.
+    </p>
+    <div class="hero-cta-group">
+      <a href="#contact" class="btn-primary">Experience the Future</a>
+      <a href="#capabilities" class="btn-secondary">Explore Capabilities</a>
+    </div>
+
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      SCROLL TO EXPLORE
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-strip">
+      <div class="stat-card">
+        <div class="corner-decoration corner-tl"></div>
+        <div class="corner-decoration corner-br"></div>
+        <div class="stat-value">100+</div>
+        <div class="stat-label">AD Accounts Managed</div>
+      </div>
+      <div class="stat-card">
+        <div class="corner-decoration corner-tl"></div>
+        <div class="corner-decoration corner-br"></div>
+        <div class="stat-value">2</div>
+        <div class="stat-label">Languages Spoken</div>
+      </div>
+      <div class="stat-card">
+        <div class="corner-decoration corner-tl"></div>
+        <div class="corner-decoration corner-br"></div>
+        <div class="stat-value">C1</div>
+        <div class="stat-label">IELTS Academic</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- CAPABILITIES -->
+<section id="capabilities">
+  <div class="section-label">01 · Core Capabilities</div>
+  <h2 class="section-title">
+    Precision-Built<br>
+    <span style="background: linear-gradient(135deg, var(--neon-blue), var(--neon-violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Security Stack</span>
+  </h2>
+
+  <div class="skills-grid">
+    <div class="skill-tile">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// 01</div>
+      <div class="skill-name">Identity & Access Mgmt</div>
+      <div class="skill-desc">Managing user identities and access controls across enterprise systems with Active Directory expertise and zero-trust architectures.</div>
+      <div class="skill-bar"><div class="skill-bar-fill" style="width:85%"></div></div>
+    </div>
+    <div class="skill-tile">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// 02</div>
+      <div class="skill-name">Data Security</div>
+      <div class="skill-desc">Implementing robust data protection protocols, encryption standards, and loss prevention strategies across hybrid environments.</div>
+      <div class="skill-bar"><div class="skill-bar-fill" style="width:80%"></div></div>
+    </div>
+    <div class="skill-tile">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// 03</div>
+      <div class="skill-name">SIEM Monitoring</div>
+      <div class="skill-desc">Real-time threat detection and incident response using Security Information and Event Management platforms for proactive defense.</div>
+      <div class="skill-bar"><div class="skill-bar-fill" style="width:75%"></div></div>
+    </div>
+    <div class="skill-tile">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// 04</div>
+      <div class="skill-name">Network Engineering</div>
+      <div class="skill-desc">LAN configuration, troubleshooting, and optimization. Reducing network downtime through systematic diagnostics and preventive protocols.</div>
+      <div class="skill-bar"><div class="skill-bar-fill" style="width:88%"></div></div>
+    </div>
+    <div class="skill-tile">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// 05</div>
+      <div class="skill-name">OS Administration</div>
+      <div class="skill-desc">Deep proficiency in Windows and Linux environments — from installation and configuration to hardening and performance tuning.</div>
+      <div class="skill-bar"><div class="skill-bar-fill" style="width:90%"></div></div>
+    </div>
+    <div class="skill-tile">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// 06</div>
+      <div class="skill-name">Mobile Dev · Java/Kotlin</div>
+      <div class="skill-desc">Building secure, performant Android applications with modern architecture patterns and security-first development practices.</div>
+      <div class="skill-bar"><div class="skill-bar-fill" style="width:70%"></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-label">02 · Field Intelligence</div>
+  <h2 class="section-title">
+    Where AI Meets<br>
+    <span style="background: linear-gradient(135deg, var(--neon-blue), var(--neon-violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Cyber Defence</span>
+  </h2>
+
+  <!-- Cybersecurity Core Capabilities -->
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin-bottom: 48px;">
+
+    <div class="skill-tile" style="border-color: rgba(0,212,255,0.2);">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// THREAT</div>
+      <div class="skill-name">Threat Detection</div>
+      <div class="skill-desc">Identifying malicious activity across networks using behavioural analytics, anomaly detection, and signature-based pattern recognition.</div>
+      <div style="margin-top: 16px; display: flex; gap: 6px; flex-wrap: wrap;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-blue); border:1px solid rgba(0,212,255,0.25); padding:3px 8px; letter-spacing:0.1em;">SIEM</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-blue); border:1px solid rgba(0,212,255,0.25); padding:3px 8px; letter-spacing:0.1em;">IDS/IPS</span>
+      </div>
+    </div>
+
+    <div class="skill-tile" style="border-color: rgba(155,77,255,0.2);">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// ACCESS</div>
+      <div class="skill-name">Identity & Access</div>
+      <div class="skill-desc">Zero-trust IAM architecture — enforcing least privilege, multi-factor authentication, and real-time access governance across all identities.</div>
+      <div style="margin-top: 16px; display: flex; gap: 6px; flex-wrap: wrap;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-violet); border:1px solid rgba(155,77,255,0.25); padding:3px 8px; letter-spacing:0.1em;">IAM</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-violet); border:1px solid rgba(155,77,255,0.25); padding:3px 8px; letter-spacing:0.1em;">MFA</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-violet); border:1px solid rgba(155,77,255,0.25); padding:3px 8px; letter-spacing:0.1em;">AD</span>
+      </div>
+    </div>
+
+    <div class="skill-tile" style="border-color: rgba(0,212,255,0.2);">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// RESPONSE</div>
+      <div class="skill-name">Incident Response</div>
+      <div class="skill-desc">Rapid containment, forensic investigation, and remediation of security incidents. Minimising dwell time and restoring system integrity fast.</div>
+      <div style="margin-top: 16px; display: flex; gap: 6px; flex-wrap: wrap;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-blue); border:1px solid rgba(0,212,255,0.25); padding:3px 8px; letter-spacing:0.1em;">FORENSICS</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-blue); border:1px solid rgba(0,212,255,0.25); padding:3px 8px; letter-spacing:0.1em;">IR PLAN</span>
+      </div>
+    </div>
+
+    <div class="skill-tile" style="border-color: rgba(155,77,255,0.2);">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// INTEL</div>
+      <div class="skill-name">Threat Intelligence</div>
+      <div class="skill-desc">Aggregating and analysing adversarial TTPs from open and closed-source feeds to anticipate attack vectors before they are weaponised.</div>
+      <div style="margin-top: 16px; display: flex; gap: 6px; flex-wrap: wrap;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-violet); border:1px solid rgba(155,77,255,0.25); padding:3px 8px; letter-spacing:0.1em;">MITRE ATT&CK</span>
+      </div>
+    </div>
+
+    <div class="skill-tile" style="border-color: rgba(0,212,255,0.2);">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// NETWORK</div>
+      <div class="skill-name">Network Security</div>
+      <div class="skill-desc">Hardening network perimeters with firewall rules, VPN configurations, traffic segmentation, and encrypted communication protocols.</div>
+      <div style="margin-top: 16px; display: flex; gap: 6px; flex-wrap: wrap;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-blue); border:1px solid rgba(0,212,255,0.25); padding:3px 8px; letter-spacing:0.1em;">VPN</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-blue); border:1px solid rgba(0,212,255,0.25); padding:3px 8px; letter-spacing:0.1em;">FIREWALL</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-blue); border:1px solid rgba(0,212,255,0.25); padding:3px 8px; letter-spacing:0.1em;">LAN</span>
+      </div>
+    </div>
+
+    <div class="skill-tile" style="border-color: rgba(155,77,255,0.2);">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// DATA</div>
+      <div class="skill-name">Data Protection</div>
+      <div class="skill-desc">Applying encryption standards, DLP policies, and compliance frameworks to safeguard sensitive data at rest, in transit, and in use.</div>
+      <div style="margin-top: 16px; display: flex; gap: 6px; flex-wrap: wrap;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-violet); border:1px solid rgba(155,77,255,0.25); padding:3px 8px; letter-spacing:0.1em;">DLP</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-violet); border:1px solid rgba(155,77,255,0.25); padding:3px 8px; letter-spacing:0.1em;">AES-256</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-violet); border:1px solid rgba(155,77,255,0.25); padding:3px 8px; letter-spacing:0.1em;">GDPR</span>
+      </div>
+    </div>
+
+    <div class="skill-tile" style="border-color: rgba(0,212,255,0.2);">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// VULN</div>
+      <div class="skill-name">Vulnerability Mgmt</div>
+      <div class="skill-desc">Continuous scanning, risk scoring, and prioritised remediation of vulnerabilities across endpoints, servers, and cloud environments.</div>
+      <div style="margin-top: 16px; display: flex; gap: 6px; flex-wrap: wrap;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-blue); border:1px solid rgba(0,212,255,0.25); padding:3px 8px; letter-spacing:0.1em;">CVE</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-blue); border:1px solid rgba(0,212,255,0.25); padding:3px 8px; letter-spacing:0.1em;">PENTEST</span>
+      </div>
+    </div>
+
+    <div class="skill-tile" style="border-color: rgba(155,77,255,0.2);">
+      <div class="skill-glow"></div>
+      <div class="skill-icon">// AI-SEC</div>
+      <div class="skill-name">AI-Driven Security</div>
+      <div class="skill-desc">Harnessing machine learning for predictive threat modelling, automated anomaly detection, and intelligent SOC operations at scale.</div>
+      <div style="margin-top: 16px; display: flex; gap: 6px; flex-wrap: wrap;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-violet); border:1px solid rgba(155,77,255,0.25); padding:3px 8px; letter-spacing:0.1em;">ML</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-violet); border:1px solid rgba(155,77,255,0.25); padding:3px 8px; letter-spacing:0.1em;">SOC</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--neon-violet); border:1px solid rgba(155,77,255,0.25); padding:3px 8px; letter-spacing:0.1em;">UEBA</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Passion Story -->
+  <div style="margin-top: 40px;">
+    <div class="section-label" style="margin-bottom: 24px;">INTELLIGENCE LOG · PERSONAL DIRECTIVE</div>
+    <div class="exp-block" style="background: linear-gradient(135deg, rgba(0,212,255,0.04), rgba(155,77,255,0.06)); border-color: rgba(155,77,255,0.25);">
+      <div class="corner-decoration corner-tl" style="border-color: var(--neon-violet);"></div>
+      <div class="corner-decoration corner-br" style="border-color: var(--neon-blue);"></div>
+      <div class="exp-date" style="color: var(--neon-blue); margin-bottom: 16px;">THE ORIGIN SIGNAL</div>
+      <div class="exp-title" style="font-size: 1.4rem; margin-bottom: 20px; line-height: 1.3;">
+        Where Artificial Intelligence<br>Meets the Last Line of Defence
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+        <div>
+          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.9; margin-bottom: 20px;">
+            My fascination with AI didn't start in a lecture hall — it started the moment I realised that machines could <em style="color: var(--neon-blue);">learn to think faster than attackers can move</em>. During my attachment at the Attorney General's Office, I watched threats evolve in real time: not random noise, but calculated, adaptive intrusions targeting the very systems I was responsible for protecting. That experience planted a question I haven't stopped chasing — what if defence could be as intelligent as the attack?
+          </p>
+          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.9;">
+            Cybersecurity, to me, is not a career — it is a calling. Every firewall rule written, every anomaly flagged, every identity verified is a small act of protecting people. When AI enters that equation, the stakes multiply. A model trained on threat patterns can detect a breach in milliseconds. An IAM system augmented with machine learning can deny a compromised credential before the attacker takes a single step. That convergence — intelligence and security — is the frontier I have dedicated myself to mastering.
+          </p>
+        </div>
+        <div>
+          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.9; margin-bottom: 20px;">
+            Pursuing my MSc in Cybersecurity at the University of Chester is not just an academic milestone — it is a deliberate move toward the intersection of machine learning and threat intelligence. I am drawn to SIEM platforms not merely as monitoring tools, but as data engines capable of fuelling predictive models. I study network behaviour not just to fix it, but to understand its grammar well enough to teach a system to read it automatically.
+          </p>
+          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.9;">
+            The world is accelerating. Adversaries are leveraging AI to craft more convincing phishing campaigns, automate vulnerability scanning, and evade signature-based detection. My conviction is simple: <em style="color: var(--neon-violet);">the most resilient defences of tomorrow will themselves be intelligent</em>. I want to build those defences — and I want to build them before the threat does.
+          </p>
+          <div style="margin-top: 24px; padding: 16px 20px; border: 1px solid rgba(0,212,255,0.2); background: rgba(0,212,255,0.03);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--neon-blue); letter-spacing: 0.2em; margin-bottom: 8px;">CORE MISSION STATEMENT</div>
+            <div style="font-family: 'Orbitron', sans-serif; font-size: 0.8rem; font-weight: 600; line-height: 1.6; color: var(--text-primary);">"Protect the digital world with the same intelligence it is built upon."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="section-label">03 · Knowledge Architecture</div>
+  <h2 class="section-title">
+    Academic<br>
+    <span style="background: linear-gradient(135deg, var(--neon-blue), var(--neon-violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Foundation</span>
+  </h2>
+
+  <div class="edu-grid">
+    <div class="edu-card">
+      <div class="corner-decoration corner-tl"></div>
+      <div class="edu-year">2025 → 2026</div>
+      <div class="edu-degree">MSc Cybersecurity</div>
+      <div class="edu-inst">University of Chester · Cheshire, UK</div>
+      <div class="edu-badge">In Progress</div>
+    </div>
+    <div class="edu-card">
+      <div class="corner-decoration corner-tl"></div>
+      <div class="edu-year">2020 → 2024</div>
+      <div class="edu-degree">BSc Information Technology</div>
+      <div class="edu-inst">Dedan Kimathi University of Technology</div>
+      <div class="edu-badge">Completed</div>
+    </div>
+    <div class="edu-card">
+      <div class="corner-decoration corner-tl"></div>
+      <div class="edu-year">2024</div>
+      <div class="edu-degree">IELTS Academic · C1</div>
+      <div class="edu-inst">Certified Proficient · English Language</div>
+      <div class="edu-badge">C1 · Proficient</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACT CTA -->
+<div class="cta-section" id="contact">
+  <div class="section-label" style="justify-content:center; text-align:center;">04 · Open Channel</div>
+  <h2 class="cta-title">
+    Ready to Build<br>
+    <span style="background: linear-gradient(135deg, var(--neon-blue), var(--neon-violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Something Remarkable?</span>
+  </h2>
+  <p class="cta-sub">Available for cybersecurity roles, collaborative projects, and technical challenges that push boundaries. Let's engineer the future together.</p>
+  <a href="/cdn-cgi/l/email-protection#83e5f7f1e2f3e8eaede4c3e4eee2eaefade0ecee" class="btn-primary">Initiate Contact</a>
+
+  <div class="contact-grid">
+    <div class="contact-item">
+      <div class="ci-dot"></div>
+      <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="690f1d1b08190200070e290e04080005470a0604">[email&#160;protected]</a>
+    </div>
+    <div class="contact-item">
+      <div class="ci-dot"></div>
+      github.com/F45elix
+    </div>
+    <div class="contact-item">
+      <div class="ci-dot"></div>
+      Crewe, Cheshire, UK
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© 2050 FELIX MEKONGE · ALL SYSTEMS RESERVED</div>
+  <div class="footer-sys">SYS.BUILD.2050 · KERNEL v9.4.1 · UPTIME: 100%</div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, button, .skill-tile, .edu-card, .contact-item').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.width = '20px';
+      cursor.style.height = '20px';
+      cursor.style.background = 'var(--neon-violet)';
+      ring.style.width = '60px';
+      ring.style.height = '60px';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.width = '12px';
+      cursor.style.height = '12px';
+      cursor.style.background = 'var(--neon-blue)';
+      ring.style.width = '40px';
+      ring.style.height = '40px';
+    });
+  });
+
+  // Neural network canvas
+  const canvas = document.getElementById('neural-canvas');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const nodes = [];
+  const nodeCount = 80;
+
+  for (let i = 0; i < nodeCount; i++) {
+    nodes.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 2 + 1
+    });
+  }
+
+  function drawNeural() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Update
+    nodes.forEach(n => {
+      n.x += n.vx;
+      n.y += n.vy;
+      if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
+      if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
+    });
+
+    // Draw connections
+    nodes.forEach((a, i) => {
+      nodes.slice(i + 1).forEach(b => {
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 160) {
+          const alpha = (1 - dist / 160) * 0.4;
+          const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+          grad.addColorStop(0, `rgba(0, 212, 255, ${alpha})`);
+          grad.addColorStop(1, `rgba(155, 77, 255, ${alpha})`);
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      });
+    });
+
+    // Draw nodes
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0, 212, 255, 0.6)`;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r * 3, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0, 212, 255, 0.05)`;
+      ctx.fill();
+    });
+
+    requestAnimationFrame(drawNeural);
+  }
+  drawNeural();
+
+  // Intersection observer for skill bars
+  const bars = document.querySelectorAll('.skill-bar-fill');
+  const widths = [];
+  bars.forEach(bar => { widths.push(bar.style.width); bar.style.width = '0%'; });
+
+  const barObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = Array.from(bars).indexOf(entry.target);
+        entry.target.style.width = widths[idx];
+        barObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  bars.forEach(bar => barObserver.observe(bar));
+
+  // Scroll reveal for sections
+  const reveals = document.querySelectorAll('section, .exp-block, .skill-tile, .edu-card');
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+        revealObserver.unobserve(entry.target);
